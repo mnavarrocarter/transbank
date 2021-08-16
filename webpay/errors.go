@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// When UseErrorLevelTwo is set to true, it maps the error codes to the new error definitions added in 2021.
+// UseErrorLevelTwo indicates whether to map errors on level 1 or 2.
 // See https://www.transbankdevelopers.cl/producto/webpay#codigos-de-respuesta-de-autorizacion
 const UseErrorLevelTwo = false
 

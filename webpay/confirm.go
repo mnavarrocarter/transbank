@@ -23,12 +23,19 @@ type TransactionInfo struct {
 	InstallmentsNumber int       `json:"installments_number"`
 }
 
-func (c *Client) Confirm(token string) (*TransactionInfo, error) {
+// Confirm confirms a transaction in Transbank
+func (c *Client) Confirm(token string) (resp *TransactionInfo, err error) {
 	path := fmt.Sprintf("/rswebpaytransaction/api/webpay/v1.0/transactions/%s", token)
-	resp := &TransactionInfo{}
-	err := c.sendRequest(http.MethodPut, path, nil, resp)
+
+	err = c.sendRequest(http.MethodPut, path, nil, resp)
 	if err != nil {
 		return nil, err
 	}
+
+	err = mapError(resp.ResponseCode)
+	if err != nil {
+		return resp, err
+	}
+
 	return resp, nil
 }

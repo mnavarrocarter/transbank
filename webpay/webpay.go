@@ -1,3 +1,4 @@
+// Package webpay implements a Client for accessing the Webpay API in a programmatic way
 package webpay
 
 import (

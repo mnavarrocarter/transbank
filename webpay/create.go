@@ -1,6 +1,9 @@
 package webpay
 
-import "net/http"
+import (
+	_ "embed"
+	"net/http"
+)
 
 type Transaction struct {
 	BuyOrder  string `json:"buy_order"`
@@ -14,6 +17,7 @@ type CreateTransactionResponse struct {
 	Url   string `json:"url"`
 }
 
+// CreateTransaction creates a webpay normal transaction
 func (c *Client) CreateTransaction(req *Transaction) (*CreateTransactionResponse, error) {
 	resp := &CreateTransactionResponse{}
 	err := c.sendRequest(http.MethodPost, "/rswebpaytransaction/api/webpay/v1.0/transactions", req, resp)

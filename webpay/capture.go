@@ -15,3 +15,7 @@ type CaptureResponse struct {
 	CapturedAmount    int       `json:"captured_amount"`
 	ResponseCode      int       `json:"response_code"`
 }
+
+func (c *Client) Capture(req *CaptureRequest) (*CaptureResponse, error) {
+
+}
