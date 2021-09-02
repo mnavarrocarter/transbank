@@ -1,6 +1,9 @@
 package webpay
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
 type MallTransaction struct {
 	BuyOrder  string `json:"buy_order"`
@@ -14,9 +17,9 @@ type MallTransaction struct {
 }
 
 
-func (c *Client) CreateMallTransaction(req *MallTransaction) (*CreateTransactionResponse, error) {
+func (c *Client) CreateMallTransaction(ctx context.Context, req *MallTransaction) (*CreateTransactionResponse, error) {
 	resp := &CreateTransactionResponse{}
-	err := c.sendRequest(http.MethodPost, "/rswebpaytransaction/api/webpay/v1.0/transactions", req, resp)
+	err := c.sendRequest(ctx, http.MethodPost, "/rswebpaytransaction/api/webpay/v1.0/transactions", req, resp)
 	if err != nil {
 		return nil, err
 	}

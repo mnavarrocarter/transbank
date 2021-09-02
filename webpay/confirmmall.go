@@ -1,6 +1,7 @@
 package webpay
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -26,10 +27,10 @@ type MallTransactionInfo struct {
 	} `json:"details"`
 }
 
-func (c *Client) ConfirmMall(token string) (*MallTransactionInfo, error) {
+func (c *Client) ConfirmMall(ctx context.Context, token string) (*MallTransactionInfo, error) {
 	path := fmt.Sprintf("/rswebpaytransaction/api/webpay/v1.0/transactions/%s", token)
 	resp := &MallTransactionInfo{}
-	err := c.sendRequest(http.MethodPut, path, nil, resp)
+	err := c.sendRequest(ctx, http.MethodPut, path, nil, resp)
 	if err != nil {
 		return nil, err
 	}

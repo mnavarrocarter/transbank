@@ -1,0 +1,16 @@
+{
+    "vci": "TSY",
+    "amount": 10000,
+    "status": "AUTHORIZED",
+    "buy_order": "ordenCompra12345678",
+    "session_id": "sesion1234557545",
+    "card_detail": {
+        "card_number": "6623"
+    },
+    "accounting_date": "0522",
+    "transaction_date": "2019-05-22T16:41:21.063Z",
+    "authorization_code": "1213",
+    "payment_type_code": "VN",
+    "response_code": 0,
+    "installments_number": 0
+}  

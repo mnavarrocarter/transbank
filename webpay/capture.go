@@ -1,6 +1,9 @@
 package webpay
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type CaptureRequest struct {
 	BuyOrder          string `json:"buy_order"`
@@ -16,6 +19,6 @@ type CaptureResponse struct {
 	ResponseCode      int       `json:"response_code"`
 }
 
-func (c *Client) Capture(req *CaptureRequest) (*CaptureResponse, error) {
-
+func (c *Client) Capture(ctx context.Context, req *CaptureRequest) (*CaptureResponse, error) {
+	panic("implement me")
 }

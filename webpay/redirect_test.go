@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-//go:embed redirect_test.html
+//go:embed testdata/redirect.0.res.html
 var resultHtml string
 
 func TestRender(t *testing.T)  {

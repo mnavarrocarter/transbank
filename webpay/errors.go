@@ -1,14 +1,25 @@
 package webpay
 
-import (
-	"errors"
-	"fmt"
-	"net/http"
-)
-
 // UseErrorLevelTwo indicates whether to map errors on level 1 or 2.
 // See https://www.transbankdevelopers.cl/producto/webpay#codigos-de-respuesta-de-autorizacion
 const UseErrorLevelTwo = false
+
+type ErrTransaction int
+
+func (e ErrTransaction) Error() string {
+	if UseErrorLevelTwo {
+		txt, ok := levelTwoErrorMap[int(e)]
+		if ok {
+			return txt
+		}
+	}
+
+	txt, ok := levelOneErrorMap[int(e)]
+	if ok {
+		return txt
+	}
+	return "unknown transaction error"
+}
 
 var (
 	levelOneErrorMap = map[int]string{
@@ -31,59 +42,3 @@ var (
 		-10: "transaction problem",
 	}
 )
-
-type UnexpectedError struct {
-	Err error
-}
-
-func (e *UnexpectedError) Error() string { return fmt.Sprintf("unexpected error: %s", e.Err.Error()) }
-
-func (e *UnexpectedError) Unwrap() error { return e.Err }
-
-type HttpProtocolError struct {
-	StatusCode int
-	Response *http.Response
-}
-
-func (e *HttpProtocolError) Error() string { return fmt.Sprintf("request failed with status %d", e.StatusCode) }
-
-type TransactionError struct {
-	Text string
-	IsLevelTwo bool
-	Code int
-}
-
-func (e *TransactionError) Error() string{
-	return e.Text
-}
-
-var (
-	ErrUnexpected = &UnexpectedError{errors.New("unexpected error")}
-	ErrHttpProtocol = &HttpProtocolError{}
-	ErrTransaction = &TransactionError{
-		Text: "unknown error code received",
-		IsLevelTwo: false,
-	}
-)
-
-func mapError(code int) error {
-	if code == 0 {
-		return nil
-	}
-
-	if UseErrorLevelTwo {
-		ErrTransaction.IsLevelTwo = true
-		txt, ok := levelTwoErrorMap[code]
-		if ok {
-			ErrTransaction.Text = txt
-		}
-		return ErrTransaction
-	}
-
-	txt, ok := levelOneErrorMap[code]
-	if ok {
-		ErrTransaction.Text = txt
-	}
-	ErrTransaction.Text = txt
-	return ErrTransaction
-}
