@@ -14,17 +14,20 @@ var redirectHtml string
 var redirectTpl, _ = template.New("redirect").Parse(redirectHtml)
 
 // Render renders the Webpay Payment Form using the passed http.Response writer
-// If rander = nil then the rand.Reader is used
-func (resp *CreateTransactionResponse) Render(rw http.ResponseWriter, rander io.Reader) {
-	if rander == nil {
-		rander = rand.Reader
+//
+// It takes r as a source of bytes to generate a randomized form id to avoid token scraping.
+//
+// If r == nil then the rand.Reader is used
+func (resp *CreateTransactionResponse) Render(rw http.ResponseWriter, r io.Reader) error {
+	if r == nil {
+		r = rand.Reader
 	}
 
 	b := make([]byte, 16)
 
-	_, err := rander.Read(b)
+	_, err := r.Read(b)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	formId := hex.EncodeToString(b)
@@ -37,6 +40,7 @@ func (resp *CreateTransactionResponse) Render(rw http.ResponseWriter, rander io.
 		"FormId": formId,
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }

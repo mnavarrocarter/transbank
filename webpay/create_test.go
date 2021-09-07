@@ -12,14 +12,16 @@ import (
 )
 
 //go:embed testdata/create.0.req.json
-var req0 []byte
+var createReq0 []byte
+
 //go:embed testdata/create.1.req.json
-var req1 []byte
+var createReq1 []byte
 
 //go:embed testdata/create.0.res.json
-var res0 []byte
+var createRes0 []byte
+
 //go:embed testdata/create.1.res.json
-var res1 []byte
+var createRes1 []byte
 
 func TestThatCreatesTransaction(t *testing.T) {
 
@@ -28,11 +30,11 @@ func TestThatCreatesTransaction(t *testing.T) {
 	httptestclient.ExpectRequest(t).
 		WithMethod("POST").
 		WithUrl("https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.0/transactions").
-		WithBody(req0).
+		WithBody(createReq0).
 		WithHeaders(reqHeaders).
 		WillReturnResponse().
 		WithStatusCode(200).
-		WithBody(res0).
+		WithBody(createRes0).
 		WithHeaders(resHeaders).
 		InjectInDefaultClient()
 
@@ -51,17 +53,17 @@ func TestThatCreatesTransaction(t *testing.T) {
 	assert.Equal(t, "https://webpay3gint.transbank.cl/webpayserver/initTransaction", resp.Url)
 }
 
-func TestThatHandlesBadInput(t *testing.T)  {
+func TestThatHandlesBadInput(t *testing.T) {
 	client := webpay.NewTestingClient()
 
 	httptestclient.ExpectRequest(t).
 		WithMethod("POST").
 		WithUrl("https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.0/transactions").
-		WithBody(req1).
+		WithBody(createReq1).
 		WithHeaders(reqHeaders).
 		WillReturnResponse().
 		WithStatusCode(422).
-		WithBody(res1).
+		WithBody(createRes1).
 		WithHeaders(resHeaders).
 		InjectInDefaultClient()
 
@@ -85,7 +87,7 @@ func TestThatHandlesConnectionError(t *testing.T) {
 	httptestclient.ExpectRequest(t).
 		WithMethod("POST").
 		WithUrl("https://webpay3gint.transbank.cl/rswebpaytransaction/api/webpay/v1.0/transactions").
-		WithBody(req0).
+		WithBody(createReq0).
 		WithHeaders(reqHeaders).
 		WillReturnResponse().
 		WithError(errors.New("connection error")).

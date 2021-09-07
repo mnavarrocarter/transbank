@@ -10,5 +10,5 @@ var reqHeaders = map[string]string{
 
 // All test responses should have these headers
 var resHeaders = map[string]string{
-	"Content-Type":       "application/json",
+	"Content-Type": "application/json",
 }

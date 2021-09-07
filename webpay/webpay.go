@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	"io"
 	"log"
@@ -20,14 +21,8 @@ const (
 	// IntApiToken is the api token for the testing environment
 	IntApiToken = "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C"
 
-	IntNormalCommerceCode               = "597055555532"
-	IntDeferredCommerceCode             = "597055555540"
-	IntMallCommerceCode                 = "597055555535"
-	IntMallChildOneCommerceCode         = "597055555536"
-	IntMallChildTwoCommerceCode         = "597055555537"
-	IntMallDeferredCommerceCode         = "597055555581"
-	IntMallDeferredChildOneCommerceCode = "597055555582"
-	IntMallDeferredChildTwoCommerceCode = "597055555583"
+	IntNormalCommerceCode   = "597055555532"
+	IntDeferredCommerceCode = "597055555540"
 )
 
 // A Client performs requests to the Webpay REST api
@@ -71,14 +66,14 @@ func (c *Client) SetHttpClient(client *http.Client) {
 func (c *Client) sendRequest(ctx context.Context, method, path string, input, output interface{}) error {
 	b, err := json.MarshalIndent(input, "", "    ")
 	if err != nil {
-		return errors.Wrapf(err, "unexpected error serializing json payload")
+		return fmt.Errorf("unexpected error serializing json payload: %w", err)
 	}
 
 	buff := bytes.NewBuffer(b)
 
 	req, err := http.NewRequest(method, c.baseUrl+path, buff)
 	if err != nil {
-		return errors.Wrapf(err, "unexpected error creating request")
+		return fmt.Errorf("unexpected error creating request: %w", err)
 	}
 
 	req = req.WithContext(ctx)
@@ -90,7 +85,7 @@ func (c *Client) sendRequest(ctx context.Context, method, path string, input, ou
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "unexpected error sending request")
+		return fmt.Errorf("unexpected error sending request: %w", err)
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -100,18 +95,18 @@ func (c *Client) sendRequest(ctx context.Context, method, path string, input, ou
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 400 {
 		var errmsg map[string]string
 		err := json.NewDecoder(resp.Body).Decode(&errmsg)
 		if err != nil {
-			return errors.Wrapf(err, "unexpected error decoding json response")
+			errmsg["error_message"] = "unknown error"
 		}
 		return errors.Errorf("request returned status %d saying: %s", resp.StatusCode, errmsg["error_message"])
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(output)
 	if err != nil {
-		return errors.Wrapf(err, "unexpected error decoding json response")
+		return fmt.Errorf("unexpected error decoding json response: %w", err)
 	}
 
 	return nil

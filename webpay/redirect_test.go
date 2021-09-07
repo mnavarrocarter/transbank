@@ -13,7 +13,7 @@ import (
 //go:embed testdata/redirect.0.res.html
 var resultHtml string
 
-func TestRender(t *testing.T)  {
+func TestRender(t *testing.T) {
 	rw := httptest.NewRecorder()
 	r := rand.New(rand.NewSource(0))
 
