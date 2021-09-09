@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"log"
 	"net/http"
@@ -63,33 +62,41 @@ func (c *Client) SetHttpClient(client *http.Client) {
 	c.client = client
 }
 
-func (c *Client) sendRequest(ctx context.Context, method, path string, input, output interface{}) error {
-	b, err := json.MarshalIndent(input, "", "    ")
-	if err != nil {
-		return fmt.Errorf("unexpected error serializing json payload: %w", err)
+func (c *Client) mustCreateRequest(ctx context.Context, method, path string, input interface{}) *http.Request {
+	var body io.Reader
+
+	if input != nil {
+		b, err := json.MarshalIndent(input, "", "    ")
+		if err != nil {
+			panic(err)
+		}
+
+		body = bytes.NewBuffer(b)
 	}
 
-	buff := bytes.NewBuffer(b)
-
-	req, err := http.NewRequest(method, c.baseUrl+path, buff)
+	req, err := http.NewRequest(method, c.baseUrl+path, body)
 	if err != nil {
-		return fmt.Errorf("unexpected error creating request: %w", err)
+		panic(err)
 	}
-
-	req = req.WithContext(ctx)
 
 	req.Header.Set("Tbk-Api-Key-Id", c.commerceCode)
 	req.Header.Set("Tbk-Api-Key-Secret", c.apiToken)
 	req.Header.Set("Content-Type", "application/json; charset=utf8")
 	req.Header.Set("Accept", "application/json; charset=utf8")
 
+	return req.WithContext(ctx)
+}
+
+func (c *Client) sendRequest(ctx context.Context, method, path string, input, output interface{}) error {
+	req := c.mustCreateRequest(ctx, method, path, input)
+
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("unexpected error sending request: %w", err)
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+	defer func(body io.ReadCloser) {
+		err := body.Close()
 		if err != nil {
 			log.Printf("could not close file: %s\n", err.Error())
 		}
@@ -101,7 +108,7 @@ func (c *Client) sendRequest(ctx context.Context, method, path string, input, ou
 		if err != nil {
 			errmsg["error_message"] = "unknown error"
 		}
-		return errors.Errorf("request returned status %d saying: %s", resp.StatusCode, errmsg["error_message"])
+		return fmt.Errorf("request returned status %d saying: %s", resp.StatusCode, errmsg["error_message"])
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(output)
